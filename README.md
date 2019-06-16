@@ -1,10 +1,10 @@
 # HotKeyUtility
 
-Changelog:
+#Changelog:
  - Add enable/disable hotkeys for network adapters.
  - removed reaquire default playback device hotkey.
  - Added configuration file for changing application parameters.
-## Older versions can be found in the old folder of this repository.
+### Older versions can be found in the old folder of this repository.
 
 HotKeyUtility for Volume, Brightness and Internet connection.
 The application requires .Net Framework v4+.
