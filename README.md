@@ -1,6 +1,6 @@
 # HotKeyUtility
 
-#Changelog:
+# Changelog:
  - Add enable/disable hotkeys for network adapters.
  - removed reaquire default playback device hotkey.
  - Added configuration file for changing application parameters.
