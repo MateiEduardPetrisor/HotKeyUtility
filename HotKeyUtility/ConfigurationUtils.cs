@@ -1,5 +1,4 @@
-﻿using HotkeyUtility;
-using log4net;
+﻿using log4net;
 using System;
 using System.Configuration;
 using System.Windows.Forms;
@@ -20,7 +19,6 @@ namespace HotKeyUtility
         private int KeyExitHashCode;
         private Configuration ConfigurationObj;
         private KeyValueConfigurationCollection KeyValueConfigurationCollectionObj;
-        private KeysConverter KeysConverterObj;
 
         public int GetModifier()
         {
@@ -74,12 +72,12 @@ namespace HotKeyUtility
 
         public ConfigurationUtils()
         {
-            this.KeysConverterObj = new KeysConverter();
             this.ConfigurationObj = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             this.KeyValueConfigurationCollectionObj = KeyValueConfigurationCollectionObj = ConfigurationObj.AppSettings.Settings;
+            this.GetAppParams();
         }
 
-        public void GetAppParams()
+        private void GetAppParams()
         {
             Program.LoggerObj = LogManager.GetLogger("ConfigurationUtils.GetAppParams()");
             try
@@ -110,25 +108,14 @@ namespace HotKeyUtility
 
         private int GetNumberFromConfiguration(String ConfigurationKey)
         {
-            Program.LoggerObj = LogManager.GetLogger("ConfigurationUtils.GetNumberFromConfig(String ConfigurationKey)");
-            int result = 0;
-            String value = "";
-            try
-            {
-                value = this.KeyValueConfigurationCollectionObj[ConfigurationKey].Value;
-                result = Int32.Parse(value);
-            }
-            catch (Exception ExceptionObj)
-            {
-                throw new Exception("Failed to convert " + value + " to int32", ExceptionObj);
-            }
-            return result;
+            String value = this.KeyValueConfigurationCollectionObj[ConfigurationKey].Value;
+            return Int32.Parse(value);
         }
 
         private Keys ConvertStringToKeysEnum(String KeyAsString)
         {
             Program.LoggerObj = LogManager.GetLogger("ConfigurationUtils.ConvertStringToKeysEnum(String KeyAsString)");
-            if (!Enum.TryParse(KeyAsString, true, out Keys KeyAsEnum))
+            if (!Enum.TryParse<Keys>(KeyAsString, true, out Keys KeyAsEnum))
             {
                 throw new Exception("Failed to convert " + KeyAsString + " to Keys Enum type");
             }

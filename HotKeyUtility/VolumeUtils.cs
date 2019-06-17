@@ -1,71 +1,99 @@
 ﻿using AudioSwitcher.AudioApi.CoreAudio;
 using System;
-using System.Configuration;
+using log4net;
 
-namespace HotkeyUtility
+namespace HotKeyUtility
 {
     public class VolumeUtils : IDisposable
     {
         private CoreAudioController CoreAudioControllerObj;
         private CoreAudioDevice CoreAudioDeviceObj;
         private double VolumeChangeValue;
+        private bool IsAudioDevicePresent;
 
         public void SetVolumeChangeValue(double NewValue)
         {
             this.VolumeChangeValue = NewValue;
         }
 
+        public bool GetIsAdudioDevicePresent()
+        {
+            return this.IsAudioDevicePresent;
+        }
+
         public VolumeUtils()
         {
+            Program.LoggerObj = LogManager.GetLogger("VolumeUtils.VolumeUtils()");
             this.CoreAudioControllerObj = new CoreAudioController();
             this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
+            this.IsAudioDevicePresent = true;
+            if (this.CoreAudioDeviceObj == null)
+            {
+                Program.LoggerObj.Info("No audio device found!");
+                this.IsAudioDevicePresent = false;
+            }
         }
 
         public void IncreaseSoundLevel()
         {
-            this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
-            double VolumeValue = this.CoreAudioDeviceObj.Volume + this.VolumeChangeValue;
-            if (VolumeValue >= 100)
+            if (this.IsAudioDevicePresent)
             {
-                this.CoreAudioDeviceObj.Volume = 100;
-            }
-            else
-            {
-                this.CoreAudioDeviceObj.Volume = VolumeValue;
+                this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
+                double VolumeValue = this.CoreAudioDeviceObj.Volume + this.VolumeChangeValue;
+                if (VolumeValue >= 100)
+                {
+                    this.CoreAudioDeviceObj.Volume = 100;
+                }
+                else
+                {
+                    this.CoreAudioDeviceObj.Volume = VolumeValue;
+                }
             }
         }
 
         public void DecreaseSoundLevel()
         {
-            this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
-            double VolumeValue = this.CoreAudioDeviceObj.Volume - this.VolumeChangeValue;
-            if (VolumeValue <= 0)
+            if (this.IsAudioDevicePresent)
             {
-                this.CoreAudioDeviceObj.Volume = 0;
-            }
-            else
-            {
-                this.CoreAudioDeviceObj.Volume = VolumeValue;
+                this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
+                double VolumeValue = this.CoreAudioDeviceObj.Volume - this.VolumeChangeValue;
+                if (VolumeValue <= 0)
+                {
+                    this.CoreAudioDeviceObj.Volume = 0;
+                }
+                else
+                {
+                    this.CoreAudioDeviceObj.Volume = VolumeValue;
+                }
             }
         }
 
         public void MuteSound()
         {
-            this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
-            if (this.CoreAudioDeviceObj.IsMuted)
+            if (this.IsAudioDevicePresent)
             {
-                this.CoreAudioDeviceObj.ToggleMute();
-            }
-            else
-            {
-                this.CoreAudioDeviceObj.ToggleMute();
+                this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
+                if (this.CoreAudioDeviceObj.IsMuted)
+                {
+                    this.CoreAudioDeviceObj.ToggleMute();
+                }
+                else
+                {
+                    this.CoreAudioDeviceObj.ToggleMute();
+                }
             }
         }
 
         public void Dispose()
         {
-            this.CoreAudioControllerObj.Dispose();
-            this.CoreAudioDeviceObj.Dispose();
+            if (this.CoreAudioControllerObj != null)
+            {
+                this.CoreAudioControllerObj.Dispose();
+            }
+            if (this.CoreAudioDeviceObj != null)
+            {
+                this.CoreAudioDeviceObj.Dispose();
+            }
         }
     }
 }

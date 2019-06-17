@@ -2,18 +2,43 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using log4net;
 
-namespace HotkeyUtility
+namespace HotKeyUtility
 {
     public class NetworkUtils
     {
         private List<NetworkInterfaceInfo> NetworkInterfaceNamesObj;
         private readonly char[] Separators = new char[] { '\r', '\n' };
+        private bool IsNetworkAdapterPresent;
+
+        public bool GetIsNetworkAdapterPresent()
+        {
+            return this.IsNetworkAdapterPresent;
+        }
 
         public NetworkUtils()
         {
+            Program.LoggerObj = LogManager.GetLogger("NetworkUtils.NetworkUtils()");
+            this.CheckForAdapters();
+            if (!this.IsNetworkAdapterPresent)
+            {
+                Program.LoggerObj.Info("No network adapters found!");
+            }
             this.NetworkInterfaceNamesObj = new List<NetworkInterfaceInfo>();
         }
+
+        private void CheckForAdapters()
+        {
+            this.IsNetworkAdapterPresent = true;
+            String output = this.GetNetshOuput();
+            String[] Tokens = output.Split(this.Separators, StringSplitOptions.RemoveEmptyEntries);
+            if (Tokens.Length == 2)
+            {
+                this.IsNetworkAdapterPresent = false;
+            }
+        }
+
         private String GetNetshOuput()
         {
             ProcessStartInfo psi = new ProcessStartInfo("netsh", "interface show interface");
@@ -58,18 +83,21 @@ namespace HotkeyUtility
 
         public void SetNetworkInterfaceState(String State, String Command)
         {
-            GetNetworkInterfaces();
-            foreach (NetworkInterfaceInfo NicInfo in this.NetworkInterfaceNamesObj)
+            if (this.IsNetworkAdapterPresent)
             {
-                if (NicInfo.GetNicState().ToLower().Equals(State.ToLower()))
+                GetNetworkInterfaces();
+                foreach (NetworkInterfaceInfo NicInfo in this.NetworkInterfaceNamesObj)
                 {
-                    ProcessStartInfo psi = new ProcessStartInfo("netsh", "interface set interface \"" + NicInfo.GetNicName() + "\" " + Command);
-                    psi.CreateNoWindow = true;
-                    psi.WindowStyle = ProcessWindowStyle.Hidden;
-                    Process p = new System.Diagnostics.Process();
-                    p.StartInfo = psi;
-                    p.Start();
-                    p.WaitForExit();
+                    if (NicInfo.GetNicState().ToLower().Equals(State.ToLower()))
+                    {
+                        ProcessStartInfo psi = new ProcessStartInfo("netsh", "interface set interface \"" + NicInfo.GetNicName() + "\" " + Command);
+                        psi.CreateNoWindow = true;
+                        psi.WindowStyle = ProcessWindowStyle.Hidden;
+                        Process p = new System.Diagnostics.Process();
+                        p.StartInfo = psi;
+                        p.Start();
+                        p.WaitForExit();
+                    }
                 }
             }
         }

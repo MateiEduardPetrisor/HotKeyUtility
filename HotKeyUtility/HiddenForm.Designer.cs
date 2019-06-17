@@ -1,4 +1,4 @@
-﻿namespace HotkeyUtility
+﻿namespace HotKeyUtility
 {
     partial class HiddenForm
     {

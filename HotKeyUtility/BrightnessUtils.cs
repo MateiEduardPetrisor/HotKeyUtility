@@ -1,16 +1,32 @@
 ﻿using System;
 using System.Management;
-using System.Windows.Forms;
+using log4net;
 
-namespace HotkeyUtility
+namespace HotKeyUtility
 {
     public class BrightnessUtils
     {
-        private bool IsSupported;
+        private bool IsBrightnessSupported;
+        private byte[] SupportedLevels;
+
+        public bool GetIsBrightnessSupported()
+        {
+            return this.IsBrightnessSupported;
+        }
 
         public BrightnessUtils()
         {
-            this.IsSupported = true;
+            try
+            {
+                this.IsBrightnessSupported = true;
+                this.SupportedLevels = this.GetSupportedBrightnessLevels();
+            }
+            catch (Exception)
+            {
+                Program.LoggerObj = LogManager.GetLogger("BrightnessUtils.BrightnessUtils()");
+                Program.LoggerObj.Info("Brightness adjustment is not supported by this monitor!");
+                this.IsBrightnessSupported = false;
+            }
         }
 
         private int GetCurrentBrightnessValue()
@@ -70,48 +86,30 @@ namespace HotkeyUtility
 
         public void IncreaseBrightness()
         {
-            if (this.IsSupported)
+            if (this.IsBrightnessSupported)
             {
-                try
+                int CurrentBrightnessValue = this.GetCurrentBrightnessValue();
+                int IndexCurrentBrightnessValue = Array.FindIndex(this.SupportedLevels, Result => Result == CurrentBrightnessValue);
+                int NextIndex = IndexCurrentBrightnessValue + 1;
+                if (NextIndex >= 0 && NextIndex < SupportedLevels.Length)
                 {
-                    int CurrentBrightnessValue = this.GetCurrentBrightnessValue();
-                    byte[] SupportedLevels = this.GetSupportedBrightnessLevels();
-                    int IndexCurrentBrightnessValue = Array.FindIndex(SupportedLevels, Result => Result == CurrentBrightnessValue);
-                    int NextIndex = IndexCurrentBrightnessValue + 1;
-                    if (NextIndex >= 0 && NextIndex < SupportedLevels.Length)
-                    {
-                        int NewBrightness = SupportedLevels[NextIndex];
-                        this.SetBrightness(NewBrightness);
-                    }
-                }
-                catch (Exception)
-                {
-                    this.IsSupported = false;
-                    MessageBox.Show("Brightness Adjust Not Supported By Your Monitor!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    int NewBrightness = SupportedLevels[NextIndex];
+                    this.SetBrightness(NewBrightness);
                 }
             }
         }
 
         public void DecreaseBrightness()
         {
-            if (this.IsSupported)
+            if (this.IsBrightnessSupported)
             {
-                try
+                int CurrentBrightnessValue = this.GetCurrentBrightnessValue();
+                int IndexCurrentBrightnessValue = Array.FindIndex(this.SupportedLevels, Result => Result == CurrentBrightnessValue);
+                int NewIndex = IndexCurrentBrightnessValue - 1;
+                if (NewIndex >= 0 && NewIndex < SupportedLevels.Length)
                 {
-                    int CurrentBrightnessValue = this.GetCurrentBrightnessValue();
-                    byte[] SupportedLevels = this.GetSupportedBrightnessLevels();
-                    int IndexCurrentBrightnessValue = Array.FindIndex(SupportedLevels, Result => Result == CurrentBrightnessValue);
-                    int NewIndex = IndexCurrentBrightnessValue - 1;
-                    if (NewIndex >= 0 && NewIndex < SupportedLevels.Length)
-                    {
-                        int NewBrightness = SupportedLevels[NewIndex];
-                        this.SetBrightness(NewBrightness);
-                    }
-                }
-                catch (Exception)
-                {
-                    this.IsSupported = false;
-                    MessageBox.Show("Brightness Adjust Not Supported By Your Monitor!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    int NewBrightness = SupportedLevels[NewIndex];
+                    this.SetBrightness(NewBrightness);
                 }
             }
         }

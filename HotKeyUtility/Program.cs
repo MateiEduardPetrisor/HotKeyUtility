@@ -2,7 +2,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace HotkeyUtility
+namespace HotKeyUtility
 {
     static class Program
     {

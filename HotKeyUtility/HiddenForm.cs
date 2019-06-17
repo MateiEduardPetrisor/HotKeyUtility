@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using HotKeyUtility;
 using log4net;
 
-namespace HotkeyUtility
+namespace HotKeyUtility
 {
     public partial class HiddenForm : Form
     {
@@ -67,22 +66,24 @@ namespace HotkeyUtility
         public HiddenForm()
         {
             InitializeComponent();
+            this.ConfigurationUtilsObj = new ConfigurationUtils();
             this.VolumeUtilsObj = new VolumeUtils();
             this.BrightnessUtilsObj = new BrightnessUtils();
             this.NetworkUtilsObj = new NetworkUtils();
-            this.ConfigurationUtilsObj = new ConfigurationUtils();
-            this.ConfigurationUtilsObj.GetAppParams();
         }
 
         private void HiddenForm_Load(object sender, EventArgs e)
         {
-            Program.LoggerObj = LogManager.GetLogger("HiddenForm.HiddenForm_Load(object sender, EventArgs e)");
-            try
+            Program.LoggerObj = LogManager.GetLogger("HiddenForm.HiddenForm_Load()");
+            int HotKeyId;
+            int HotKeyHashCode;
+            int KeyModifier;
+            if (this.VolumeUtilsObj.GetIsAdudioDevicePresent())
             {
                 this.VolumeUtilsObj.SetVolumeChangeValue(this.ConfigurationUtilsObj.GetVolumeChangeValue());
-                int HotKeyId = (int)HotKeyIds.DecreaseVolumeHotKeyId;
-                int HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyVolumeDown();
-                int KeyModifier = this.ConfigurationUtilsObj.GetModifier();
+                HotKeyId = (int)HotKeyIds.DecreaseVolumeHotKeyId;
+                HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyVolumeDown();
+                KeyModifier = this.ConfigurationUtilsObj.GetModifier();
                 if (!RegisterHotKey(this.Handle, HotKeyId, KeyModifier, HotKeyHashCode))
                 {
                     Program.LoggerObj.Error("Failed to register global hotkey for VolumeDown " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
@@ -101,6 +102,9 @@ namespace HotkeyUtility
                 {
                     Program.LoggerObj.Error("Failed to register global hotkey for VolumeMute " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
                 }
+            }
+            if (this.BrightnessUtilsObj.GetIsBrightnessSupported())
+            {
                 HotKeyId = (int)HotKeyIds.IncreaseBrigthnessHotKeyId;
                 HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyBrightnessUp();
                 KeyModifier = this.ConfigurationUtilsObj.GetModifier();
@@ -115,6 +119,9 @@ namespace HotkeyUtility
                 {
                     Program.LoggerObj.Error("Failed to register global hotkey for BrightnessDown " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
                 }
+            }
+            if (this.NetworkUtilsObj.GetIsNetworkAdapterPresent())
+            {
                 HotKeyId = (int)HotKeyIds.DisableNetworkConnectionHotKeyId;
                 HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyNetworkDown();
                 KeyModifier = this.ConfigurationUtilsObj.GetModifier();
@@ -129,59 +136,64 @@ namespace HotkeyUtility
                 {
                     Program.LoggerObj.Error("Failed to register global hotkey for NetworkUp " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
                 }
-                HotKeyId = (int)HotKeyIds.ExitApplicationHotKeyId;
-                HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyExit();
-                KeyModifier = this.ConfigurationUtilsObj.GetModifier();
-                if (!RegisterHotKey(this.Handle, HotKeyId, KeyModifier, HotKeyHashCode))
-                {
-                    Program.LoggerObj.Error("Failed to register global hotkey for Exit " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
-                }
             }
-            catch (Exception ExceptionObj)
+            HotKeyId = (int)HotKeyIds.ExitApplicationHotKeyId;
+            HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyExit();
+            KeyModifier = this.ConfigurationUtilsObj.GetModifier();
+            if (!RegisterHotKey(this.Handle, HotKeyId, KeyModifier, HotKeyHashCode))
             {
-                Program.LoggerObj.Error("Error registering all global hotkeys", ExceptionObj);
-                Environment.Exit(-1);
+                Program.LoggerObj.Error("Failed to register global hotkey for Exit " + "Id = " + HotKeyId + " Modifier = " + KeyModifier);
             }
         }
 
         private void HiddenForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Program.LoggerObj = LogManager.GetLogger("HiddenForm.HiddenForm_Closing(object sender, FormClosingEventArgs e)");
-            this.VolumeUtilsObj.Dispose();
-            int HotKeyId = (int)HotKeyIds.IncreaseVolumeHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
+            Program.LoggerObj = LogManager.GetLogger("HiddenForm.HiddenForm_Closing()");
+            int HotKeyId;
+            if (this.VolumeUtilsObj.GetIsAdudioDevicePresent())
             {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeUp");
+                this.VolumeUtilsObj.Dispose();
+                HotKeyId = (int)HotKeyIds.IncreaseVolumeHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeUp");
+                }
+                HotKeyId = (int)HotKeyIds.DecreaseVolumeHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeDown");
+                }
+                HotKeyId = (int)HotKeyIds.MuteVolumeHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeMute");
+                }
             }
-            HotKeyId = (int)HotKeyIds.DecreaseVolumeHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
+            if (this.BrightnessUtilsObj.GetIsBrightnessSupported())
             {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeDown");
+                HotKeyId = (int)HotKeyIds.IncreaseBrigthnessHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed unregistered global hotkey for BrightnessUp");
+                }
+                HotKeyId = (int)HotKeyIds.DecreaseBrigthnessHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for BrightnessDown");
+                }
             }
-            HotKeyId = (int)HotKeyIds.MuteVolumeHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
+            if (this.NetworkUtilsObj.GetIsNetworkAdapterPresent())
             {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for VolumeMute");
-            }
-            HotKeyId = (int)HotKeyIds.IncreaseBrigthnessHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
-            {
-                Program.LoggerObj.Error("Failed unregistered global hotkey for BrightnessUp");
-            }
-            HotKeyId = (int)HotKeyIds.DecreaseBrigthnessHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
-            {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for BrightnessDown");
-            }
-            HotKeyId = (int)HotKeyIds.DisableNetworkConnectionHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
-            {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for NetworkDown");
-            }
-            HotKeyId = (int)HotKeyIds.EnableNetworkConnectionHotKeyId;
-            if (!UnregisterHotKey(this.Handle, HotKeyId))
-            {
-                Program.LoggerObj.Error("Failed to unregistered global hotkey for NetworkUp");
+                HotKeyId = (int)HotKeyIds.DisableNetworkConnectionHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for NetworkDown");
+                }
+                HotKeyId = (int)HotKeyIds.EnableNetworkConnectionHotKeyId;
+                if (!UnregisterHotKey(this.Handle, HotKeyId))
+                {
+                    Program.LoggerObj.Error("Failed to unregistered global hotkey for NetworkUp");
+                }
             }
             HotKeyId = (int)HotKeyIds.ExitApplicationHotKeyId;
             if (!UnregisterHotKey(this.Handle, HotKeyId))
