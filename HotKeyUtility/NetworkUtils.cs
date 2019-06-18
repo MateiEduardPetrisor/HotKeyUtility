@@ -86,11 +86,11 @@ namespace HotKeyUtility
             if (this.IsNetworkAdapterPresent)
             {
                 GetNetworkInterfaces();
-                foreach (NetworkInterfaceInfo NicInfo in this.NetworkInterfaceNamesObj)
+                for (int IndexNetworkAdapters = 0; IndexNetworkAdapters < this.NetworkInterfaceNamesObj.Count; IndexNetworkAdapters++)
                 {
-                    if (NicInfo.GetNicState().ToLower().Equals(State.ToLower()))
+                    if (this.NetworkInterfaceNamesObj[IndexNetworkAdapters].GetNicState().ToLower().Equals(State.ToLower()))
                     {
-                        ProcessStartInfo psi = new ProcessStartInfo("netsh", "interface set interface \"" + NicInfo.GetNicName() + "\" " + Command);
+                        ProcessStartInfo psi = new ProcessStartInfo("netsh", "interface set interface \"" + this.NetworkInterfaceNamesObj[IndexNetworkAdapters].GetNicName() + "\" " + Command);
                         psi.CreateNoWindow = true;
                         psi.WindowStyle = ProcessWindowStyle.Hidden;
                         Process p = new System.Diagnostics.Process();
