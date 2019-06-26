@@ -9,6 +9,7 @@ namespace HotKeyUtility
     {
         private int Modifier;
         private double VolumeChangeValue;
+        private int BrightnessChangeValue;
         private int KeyVolumeUpHashCode;
         private int KeyVolumeDownHashCode;
         private int KeyVolumeMuteHashCode;
@@ -70,6 +71,11 @@ namespace HotKeyUtility
             return this.KeyExitHashCode;
         }
 
+        public int GetBrightnessChangeValue()
+        {
+            return this.BrightnessChangeValue;
+        }
+
         public ConfigurationUtils()
         {
             this.ConfigurationObj = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -82,8 +88,18 @@ namespace HotKeyUtility
             Program.LoggerObj = LogManager.GetLogger("ConfigurationUtils.GetAppParams()");
             try
             {
-                this.Modifier = this.GetNumberFromConfiguration("Modifier");
+
                 this.VolumeChangeValue = this.GetNumberFromConfiguration("VolumeChangeValue");
+                if (!(this.VolumeChangeValue >= 1 && this.VolumeChangeValue <= 10))
+                {
+                    throw new ArgumentException("VolumeChangeValue must be between 1 and 10! VolumeChangeValue = " + this.VolumeChangeValue);
+                }
+                this.BrightnessChangeValue = this.GetNumberFromConfiguration("BrightnessChangeValue");
+                if (!(this.BrightnessChangeValue >= 1 && this.BrightnessChangeValue <= 10))
+                {
+                    throw new ArgumentException("BrightnessChangeValue must be between 1 and 10! BrightnessChangeValue = " + this.BrightnessChangeValue);
+                }
+                this.Modifier = this.GetNumberFromConfiguration("Modifier");
                 this.KeyVolumeUpHashCode = this.GetHotKeyFromHashCode("KeyVolumeUp");
                 this.KeyVolumeDownHashCode = this.GetHotKeyFromHashCode("KeyVolumeDown");
                 this.KeyVolumeMuteHashCode = this.GetHotKeyFromHashCode("KeyVolumeMute");
@@ -92,6 +108,11 @@ namespace HotKeyUtility
                 this.KeyNetworkUpHashCode = this.GetHotKeyFromHashCode("KeyNetworkUp");
                 this.KeyNetworkDownHashCode = this.GetHotKeyFromHashCode("KeyNetworkDown");
                 this.KeyExitHashCode = this.GetHotKeyFromHashCode("KeyExit");
+            }
+            catch (ArgumentException ExceptionObj)
+            {
+                Program.LoggerObj.Error("Invalid argument value specified!", ExceptionObj);
+                Environment.Exit(-1);
             }
             catch (Exception ExceptionObj)
             {

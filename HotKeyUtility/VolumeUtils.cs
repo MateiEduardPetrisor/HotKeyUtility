@@ -8,25 +8,21 @@ namespace HotKeyUtility
     {
         private CoreAudioController CoreAudioControllerObj;
         private CoreAudioDevice CoreAudioDeviceObj;
-        private double VolumeChangeValue;
         private bool IsAudioDevicePresent;
-
-        public void SetVolumeChangeValue(double NewValue)
-        {
-            this.VolumeChangeValue = NewValue;
-        }
+        private double VolumeChangeValue;
 
         public bool GetIsAdudioDevicePresent()
         {
             return this.IsAudioDevicePresent;
         }
 
-        public VolumeUtils()
+        public VolumeUtils(double VolumeChange)
         {
             Program.LoggerObj = LogManager.GetLogger("VolumeUtils.VolumeUtils()");
             this.CoreAudioControllerObj = new CoreAudioController();
             this.CoreAudioDeviceObj = this.CoreAudioControllerObj.DefaultPlaybackDevice;
             this.IsAudioDevicePresent = true;
+            this.VolumeChangeValue = VolumeChange;
             if (this.CoreAudioDeviceObj == null)
             {
                 Program.LoggerObj.Info("No audio device found!");

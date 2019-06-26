@@ -8,18 +8,42 @@ namespace HotKeyUtility
     {
         private bool IsBrightnessSupported;
         private byte[] SupportedLevels;
+        private int BrightnessChangeValue;
 
         public bool GetIsBrightnessSupported()
         {
             return this.IsBrightnessSupported;
         }
 
-        public BrightnessUtils()
+        private void SetSupportedLevels()
+        {
+            byte[] allBrightnessLevels = this.GetSupportedBrightnessLevels();
+            int supportedLevelsLength = 0;
+            for (int i = this.BrightnessChangeValue; i < allBrightnessLevels.Length; i += this.BrightnessChangeValue)
+            {
+                supportedLevelsLength++;
+            }
+            this.SupportedLevels = new byte[supportedLevelsLength + 1];
+            this.SupportedLevels[0] = allBrightnessLevels[0];
+            this.SupportedLevels[supportedLevelsLength] = allBrightnessLevels[allBrightnessLevels.Length - 1];
+            int copyIndex = 1;
+            for (int i = this.BrightnessChangeValue; i < allBrightnessLevels.Length; i += this.BrightnessChangeValue)
+            {
+                if (copyIndex < supportedLevelsLength)
+                {
+                    this.SupportedLevels[copyIndex] = allBrightnessLevels[i];
+                    copyIndex++;
+                }
+            }
+        }
+
+        public BrightnessUtils(int NumberOfBrightnessIntervals)
         {
             try
             {
                 this.IsBrightnessSupported = true;
-                this.SupportedLevels = this.GetSupportedBrightnessLevels();
+                this.BrightnessChangeValue = NumberOfBrightnessIntervals;
+                this.SetSupportedLevels();
             }
             catch (Exception)
             {
@@ -50,7 +74,7 @@ namespace HotKeyUtility
 
         private byte[] GetSupportedBrightnessLevels()
         {
-            byte[] SupportedLevels = null;
+            byte[] AllBrightnessSupportedLevels = null;
             ManagementScope ManagementScopeObj = new ManagementScope("root\\WMI");
             SelectQuery SelectQueryObj = new SelectQuery("WmiMonitorBrightness");
             using (ManagementObjectSearcher ManagementObjectSearcherObj = new ManagementObjectSearcher(ManagementScopeObj, SelectQueryObj))
@@ -59,12 +83,12 @@ namespace HotKeyUtility
                 {
                     foreach (ManagementObject ManagementObjectObj in ManagementObjectCollectionObj)
                     {
-                        SupportedLevels = (byte[])ManagementObjectObj.GetPropertyValue("Level");
+                        AllBrightnessSupportedLevels = (byte[])ManagementObjectObj.GetPropertyValue("Level");
                         break;
                     }
                 }
             }
-            return SupportedLevels;
+            return AllBrightnessSupportedLevels;
         }
 
         private void SetBrightness(int BrightnessValue)
@@ -77,7 +101,7 @@ namespace HotKeyUtility
                 {
                     foreach (ManagementObject ManagementObjectObj in ManagementObjectCollectionObj)
                     {
-                        ManagementObjectObj.InvokeMethod("WmiSetBrightness", new Object[] { UInt32.MaxValue, Convert.ToByte(BrightnessValue) });
+                        ManagementObjectObj.InvokeMethod("WmiSetBrightness", new Object[] { Int32.MaxValue, Convert.ToByte(BrightnessValue) });
                         break;
                     }
                 }

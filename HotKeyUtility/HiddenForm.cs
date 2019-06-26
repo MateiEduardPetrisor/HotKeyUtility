@@ -67,8 +67,8 @@ namespace HotKeyUtility
         {
             InitializeComponent();
             this.ConfigurationUtilsObj = new ConfigurationUtils();
-            this.VolumeUtilsObj = new VolumeUtils();
-            this.BrightnessUtilsObj = new BrightnessUtils();
+            this.VolumeUtilsObj = new VolumeUtils(this.ConfigurationUtilsObj.GetVolumeChangeValue());
+            this.BrightnessUtilsObj = new BrightnessUtils(this.ConfigurationUtilsObj.GetBrightnessChangeValue());
             this.NetworkUtilsObj = new NetworkUtils();
         }
 
@@ -80,7 +80,6 @@ namespace HotKeyUtility
             int KeyModifier;
             if (this.VolumeUtilsObj.GetIsAdudioDevicePresent())
             {
-                this.VolumeUtilsObj.SetVolumeChangeValue(this.ConfigurationUtilsObj.GetVolumeChangeValue());
                 HotKeyId = (int)HotKeyIds.DecreaseVolumeHotKeyId;
                 HotKeyHashCode = this.ConfigurationUtilsObj.GetKeyVolumeDown();
                 KeyModifier = this.ConfigurationUtilsObj.GetModifier();
