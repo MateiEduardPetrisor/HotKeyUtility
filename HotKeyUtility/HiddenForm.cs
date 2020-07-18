@@ -28,8 +28,6 @@ namespace HotKeyUtility
 
         protected override void WndProc(ref Message MessageObjct)
         {
-            base.WndProc(ref MessageObjct);
-
             if (MessageObjct.Msg == 0x0312)
             {
                 int HotKeyId = MessageObjct.WParam.ToInt32();
@@ -61,6 +59,7 @@ namespace HotKeyUtility
                         break;
                 }
             }
+            base.WndProc(ref MessageObjct);
         }
 
         public HiddenForm()

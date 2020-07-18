@@ -4,6 +4,7 @@
  - Add enable/disable hotkeys for network adapters.
  - removed reaquire default playback device hotkey.
  - Added configuration file for changing application parameters.
+ - Added sample powershell script to generate your own self signed certificate for signing the app.
 ### Older versions can be found in the old folder of this repository.
 
 HotKeyUtility for Volume, Brightness and Internet connection.
